@@ -1,0 +1,135 @@
+# CleanSky AI Configuration Settings
+
+# Data Sources Configuration
+data_sources:
+  tempo:
+    base_url: "https://disc.gsfc.nasa.gov/datasets/"
+    datasets:
+      - "TEMPO_NO2_L3"
+      - "TEMPO_O3_L3"
+      - "TEMPO_HCHO_L3"
+    update_interval: 3600  # seconds
+    
+  ground_stations:
+    epa:
+      base_url: "https://aqs.epa.gov/data/api"
+      parameters:
+        - "44201"  # Ozone
+        - "42401"  # SO2
+        - "42101"  # CO
+        - "88101"  # PM2.5
+    
+    airnow:
+      base_url: "https://www.airnowapi.org/aq"
+      format: "application/json"
+      
+  weather:
+    openweather:
+      base_url: "https://api.openweathermap.org/data/2.5"
+      endpoints:
+        - "weather"
+        - "forecast"
+        - "air_pollution"
+
+# Machine Learning Configuration
+ml_models:
+  forecast:
+    algorithm: "XGBoost"
+    features:
+      - "temperature"
+      - "humidity"
+      - "wind_speed"
+      - "wind_direction"
+      - "pressure"
+      - "no2_column"
+      - "o3_column"
+      - "pm25_concentration"
+    
+    hyperparameters:
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      
+    training:
+      test_split: 0.2
+      cross_validation_folds: 5
+      retrain_frequency: 24  # hours
+
+# Alert System Configuration
+alerts:
+  notification_channels:
+    - "email"
+    - "sms"
+    - "push"
+    
+  severity_levels:
+    green:
+      aqi_range: [0, 50]
+      color: "#00E400"
+      message: "Air quality is good"
+      
+    yellow:
+      aqi_range: [51, 100]
+      color: "#FFFF00"
+      message: "Air quality is moderate"
+      
+    orange:
+      aqi_range: [101, 150]
+      color: "#FF7E00"
+      message: "Unhealthy for sensitive groups"
+      
+    red:
+      aqi_range: [151, 200]
+      color: "#FF0000"
+      message: "Air quality is unhealthy"
+      
+    purple:
+      aqi_range: [201, 300]
+      color: "#8F3F97"
+      message: "Air quality is very unhealthy"
+      
+    maroon:
+      aqi_range: [301, 500]
+      color: "#7E0023"
+      message: "Hazardous air quality"
+
+# Visualization Configuration
+visualization:
+  maps:
+    default_center: [39.8283, -98.5795]  # Geographic center of US
+    default_zoom: 4
+    tile_layer: "CartoDB positron"
+    
+  charts:
+    color_scheme: "viridis"
+    time_series_points: 168  # 1 week hourly data
+    
+# Performance and Caching
+performance:
+  cache:
+    redis_expiry: 1800  # 30 minutes
+    file_cache_size: "1GB"
+    
+  api:
+    rate_limit: 1000  # requests per hour
+    timeout: 30  # seconds
+    max_retries: 3
+    
+  database:
+    pool_size: 10
+    max_overflow: 20
+    pool_timeout: 30
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  handlers:
+    - "console"
+    - "file"
+  
+  files:
+    app_log: "logs/cleansky_app.log"
+    error_log: "logs/cleansky_error.log"
+    access_log: "logs/cleansky_access.log"
